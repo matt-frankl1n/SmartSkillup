@@ -92,14 +92,14 @@ modules_default = T{
 	mp_limit = T{label = 'MP Limit', available = true , hidden = false}, -- first three are always available
 	t_target = T{label = 'T.Target', available = true , hidden = false},
 	food     = T{label = 'Food'    , available = true , hidden = false},
-	moogle   = T{label = 'Moogle'  , available = false, hidden = false, res = {res.spells:find(function(r) return r.en == 'Moogle' end)}[2]}, -- use dynamic lookups to protect against ID shifts
-	refresh  = T{label = 'Refresh' , available = false, hidden = false, --[[res varies]]},
-	haste    = T{label = 'Haste'   , available = false, hidden = false, --[[res varies]]},
-	georef   = T{label = 'Geo-Ref.', available = false, hidden = false, res = {res.spells:find(function(r) return r.en == 'Geo-Refresh' end)}[2]},
-	sublim   = T{label = 'Sublim.' , available = false, hidden = false, res = {res.job_abilities:find(function(r) return r.en == 'Sublimation' end)}[2]},
-	convert  = T{label = 'Convert' , available = false, hidden = false, res = {res.job_abilities:find(function(r) return r.en == 'Convert' end)}[2]},
-	compo    = T{label = 'Compos.' , available = false, hidden = true , res = {res.job_abilities:find(function(r) return r.en == 'Composure' end)}[2]},
-	radial   = T{label = 'Radial.A', available = false, hidden = true , res = {res.job_abilities:find(function(r) return r.en == 'Radial Arcana' end)}[2]},
+	moogle   = T{label = 'Moogle'  , available = false, hidden = false, res = ({res.spells:find(function(r) return r.en == 'Moogle' end)})[2]}, -- use dynamic lookups to protect against ID shifts
+	refresh  = T{label = 'Refresh' , available = false, hidden = false}, --[[res varies]]
+	haste    = T{label = 'Haste'   , available = false, hidden = false}, --[[res varies]]
+	georef   = T{label = 'Geo-Ref.', available = false, hidden = false, res = ({res.spells:find(function(r) return r.en == 'Geo-Refresh' end)})[2]},
+	sublim   = T{label = 'Sublim.' , available = false, hidden = false, res = ({res.job_abilities:find(function(r) return r.en == 'Sublimation' end)})[2]},
+	convert  = T{label = 'Convert' , available = false, hidden = false, res = ({res.job_abilities:find(function(r) return r.en == 'Convert' end)})[2]},
+	compo    = T{label = 'Compos.' , available = false, hidden = true , res = ({res.job_abilities:find(function(r) return r.en == 'Composure' end)})[2]}, 
+	radial   = T{label = 'Radial.A', available = false, hidden = true , res = ({res.job_abilities:find(function(r) return r.en == 'Radial Arcana' end)})[2]}
 }
 
 
@@ -117,19 +117,23 @@ function end_timeout(source)
 	logger(chat_colors.purple, '[TIMEOUT END] Timeout ended' .. (source and ' by ' .. source or '') .. '.', false, true)
 end
 
-function schedule_decision(delay, source, ...)
-	threads.make_decision = make_decision:schedule(delay, source)
-	if {...}[2] then logger(...) end
+local function schedule_decision(delay, source, ...)
+	local args = {...}
+	threads.make_decision = coroutine.schedule(function() make_decision(source) end, delay)
+	if args[2] then 
+		logger(unpack(args))
+	end
 end
 
 function end_decision()
 	coroutine.close(threads.make_decision)
 end
 
-function end_timeout_and_decision(source, ...)
+local function end_timeout_and_decision(source, ...)
+	local args = {...}
 	end_timeout(source or 'end_timeout_and_decision')
 	end_decision()
-	if {...}[2] then logger(...) end
+	if args[2] then logger(unpack(args)) end
 end
 
 
@@ -397,10 +401,10 @@ function make_decision(source) --must be global to both A) be called from above 
 				-- SELF/PARTY SPELLS (Prefer trusts for ilvl target skillup chance multiplier)
 				if spell.targets.Self and spell.targets.Party then
 					for i = 1, 5, 1 do
-						local entity = windower.ffxi.get_mob_by_target('p' .. i)
+						local entity = windower.ffxi.get_mob_by_target('<p' .. i .. '>') -- party members
 						local castable = not untargetable_trusts:contains((entity or {}).name)
 						if (entity or {}).spawn_type == 14 and castable and entity.distance:sqrt() <= 20 then
-							return 'p' .. i
+							return '<p' .. i .. '>'
 						end
 					end
 					return '<me>' -- fallback target
