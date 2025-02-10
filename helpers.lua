@@ -600,7 +600,7 @@ function determine_modules()
 		modules.moogle.available = true -- res already populated
 	end
 	-- DYNAMIC SPELL MODULES (Refresh/Haste)
-	for _, spell in pairs(res.spells) do
+	for id, spell in pairs(res.spells) do
 		local skill_en = res.skills[spell.skill].en;
 		if is_valid(spell, skill_en, true) then
 			-- REFRESH MODULE, weighted by priority
