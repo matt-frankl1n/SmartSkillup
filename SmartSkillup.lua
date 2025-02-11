@@ -117,8 +117,8 @@ function end_timeout(source)
 	logger(chat_colors.purple, '[TIMEOUT END] Timeout ended' .. (source and ' by ' .. source or '') .. '.', false, true)
 end
 
-local function schedule_decision(delay, source, ...)
-	local args = {...}
+function schedule_decision(delay, source, ...)
+	args = {...}
 	threads.make_decision = coroutine.schedule(function() make_decision(source) end, delay)
 	if args[2] then 
 		logger(unpack(args))
@@ -129,8 +129,8 @@ function end_decision()
 	coroutine.close(threads.make_decision)
 end
 
-local function end_timeout_and_decision(source, ...)
-	local args = {...}
+function end_timeout_and_decision(source, ...)
+	args = {...}
 	end_timeout(source or 'end_timeout_and_decision')
 	end_decision()
 	if args[2] then logger(unpack(args)) end
@@ -209,7 +209,7 @@ function use_module()
 				if me.main_job_level < 99 then
 					logger(chat_colors.yellow, '[NOTICE] You are not ilvl, so your mileage with this module may vary.')
 				end
-				windower.send_command('input ' .. spell.prefix .. ' "' .. spell.en .. '"')
+				windower.send_command('input ' .. spell.prefix .. ' "' .. spell.en .. '"' .. '<me>')
 				return true
 			end
 		end
