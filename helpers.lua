@@ -300,7 +300,7 @@ end
 -- Requests skill data from the server, with a timeout, with a cutscene failsafe
 -- NOTE: During events the server queues your packet replies, so a spam of requests would get a spam of replies
 -------------------------------------------------------------------------------------------------------------------
-local function SkillDataRequestTimeout(attempts)
+function SkillDataRequestTimeout(attempts)
 	attempts = attempts or 0
 	local freq = 10 --seconds
 	local attempts_max = (60/freq)*1 --1 minute
